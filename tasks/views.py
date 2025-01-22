@@ -1,7 +1,8 @@
 from django.shortcuts import render
 from django.http import HttpResponse
 from tasks.forms import TaskForm, TaskModelForm
-from tasks.models import Employee, Task
+from tasks.models import Employee, Task,Project
+from django.db.models import Q,Count, Max, Min, Avg
 
 # Create your views here.
 
@@ -59,3 +60,38 @@ def create_task(request):
 
     context = {"form": form}
     return render(request, "task_form.html", context)
+
+def view_task(request):
+    # tasks= Task.objects.all()
+    # padding_task=Task.objects.filter(status="PENDING")
+    # single_task=Task.objects.frist()
+    # task3=Task.objects.get(id=3)
+
+    # using exclude
+    # tasks= TaskDetail.objects.exclude(priority="L")
+
+    # for using or condition
+    # tasks=Task.objects.filter(Q(status="PENDING") | Q(status="IN-PROGRESS"))
+    
+    # USING SELECT RELETED TO JOIN DATA
+    # tasks= Task.objects.select_related('details').all()
+    # tasks=Task.objects.select_related('task').all() from details to task
+
+    # using foregnkey
+    # tasks=Task.objects.select_related("project").all()
+
+    """ prefetch_releted (reverse Foreignkey, manytomany)"""
+    # this is for foreignkey
+    # tasks = Project.objects.prefetch_related('task_set').all()
+
+    # for manytomany
+    # tasks = Task.objects.prefetch_related('assigned_to').all()
+
+
+    # use aggregate
+    # task_count= Task.objects.aggregate(num_task=Count('id'))
+
+    # using annotate
+    projects = Project.objects.annotate(
+        num_task=Count('task')).order_by('num_task')
+    return render(request, "show_task.html", {"projects": projects})
